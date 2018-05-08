@@ -1,0 +1,12 @@
+name: jarm_analysis
+channels:
+  - alubbock
+  - anaconda
+  - conda-forge
+dependencies:
+- pysb
+- matplotlib
+- pathos
+- ipython
+- pip:
+  - cython
