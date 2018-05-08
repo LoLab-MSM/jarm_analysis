@@ -8,5 +8,5 @@ dependencies:
 - matplotlib
 - pathos
 - ipython
-- pip:
-  - cython
+- cython
+

@@ -34,4 +34,4 @@ def run_sim(parameters):
 p = Pool(25)
 res = p.amap(run_sim, samples[4])
 sims = res.get()
-np.save('sim_results.npy', sims)
+np.save('sim_results.npy', np.array(sims))
