@@ -34,7 +34,7 @@ cupsoda_solver = CupSodaSimulator(model, tspan=tspan_eq, gpu=0, obs_species_only
 
 pars_eq = np.copy(all_parameters)
 pars_eq[:, [24, 25]] = 0
-conc_eq = pre_equilibration(cupsoda_solver, param_values=pars_eq)
+conc_eq = pre_equilibration(cupsoda_solver, param_values=pars_eq)[1]
 
 sims_final = CupSodaSimulator(model, tspan=tspan, gpu=0, obs_species_only=False,
                               memory_usage='shared_constant',
