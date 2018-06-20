@@ -8,7 +8,7 @@ with open('pydream_kpars_signatures.pickle', 'rb') as handle:
 cpus = 30
 rxn_type = 'consumption'
 
-uujnk3_signatures = all_signatures[37][rxn_type]
+uujnk3_signatures = all_signatures[3][rxn_type]
 clus = clustering.ClusterSequences(seqdata=uujnk3_signatures, unique_sequences=False)
 # diss = np.load('pydream_uujnk3_diss.npy')
 # clus.diss = diss
