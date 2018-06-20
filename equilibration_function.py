@@ -1,22 +1,21 @@
 import numpy as np
-from pysb.simulator import ScipyOdeSimulator
 from itertools import compress
 
 
-def pre_equilibration(model, time_search, parameters=None, tolerance=1e-6):
+def pre_equilibration(solver, time_search=None, param_values=None, tolerance=1e-6):
     """
 
     Parameters
     ----------
-    model : pysb.Model
-        pysb model
-    time_search : np.array
-        Time span array used to find the equilibrium
-    parameters :  dict or np.array
+    solver : pysb solver
+        a pysb solver object
+    time_search : np.array, optional
+        Time span array used to find the equilibrium. If not provided, function will use tspan from the solver
+    param_values :  dict or np.array, optional
         Model parameters used to find the equilibrium, it can be an array with all model parameters
         (this array must have the same order as model.parameters) or it can be a dictionary where the
         keys are the parameter names thatpara want to be changed and the values are the new parameter
-        values.
+        values. If not provided, function will use param_values from the solver
     tolerance : float
         Tolerance to define when the equilibrium has been reached
 
@@ -25,16 +24,19 @@ def pre_equilibration(model, time_search, parameters=None, tolerance=1e-6):
 
     """
     # Solve system for the time span provided
-    solver = ScipyOdeSimulator(model, tspan=time_search, param_values=parameters).run()
-    if solver.nsims == 1:
-        simulations = [solver.species]
+    sims = solver.run(tspan=time_search, param_values=param_values)
+    if not time_search:
+        time_search = solver.tspan
+
+    if sims.nsims == 1:
+        simulations = [sims.species]
     else:
-        simulations = solver.species
+        simulations = sims.species
 
     dt = time_search[1] - time_search[0]
 
-    all_times_eq = [0] * solver.nsims
-    all_conc_eq = [0] * solver.nsims
+    all_times_eq = [0] * sims.nsims
+    all_conc_eq = [0] * sims.nsims
     for n, y in enumerate(simulations):
         time_to_equilibration = [0, 0]
         for idx in range(y.shape[1]):
