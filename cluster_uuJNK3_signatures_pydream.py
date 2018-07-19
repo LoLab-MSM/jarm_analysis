@@ -17,7 +17,7 @@ np.save('pydream_uujnk3_diss.npy', clus.diss)
 
 sil_df = clus.silhouette_score_spectral_range(cluster_range=range(2, 20), n_jobs=cpus, random_state=1234)
 print (sil_df)
-best_silh, n_clus = sil_df.loc[sil_df['cluster_silhouette'].idxmax()]
+n_clus, best_silh = sil_df.loc[sil_df['cluster_silhouette'].idxmax()]
 n_clus = int(n_clus)
 # n_clus = 7
 
