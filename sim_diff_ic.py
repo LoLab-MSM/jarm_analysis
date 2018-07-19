@@ -35,6 +35,7 @@ conc_eq = pre_equilibration(cupsoda_solver, param_values=pars_eq)[1]
 
 sims_final = CupSodaSimulator(model, tspan=tspan, gpu=0, obs_species_only=False,
                               memory_usage='shared_constant',
-                              integrator_options=integrator_opt).run(param_values=all_parameters, initials=conc_eq)
+                              integrator_options=integrator_opt).run(param_values=repeated_parameter_values,
+                                                                     initials=conc_eq)
 
 sims_final.save('simulations_ic_jnk3.h5')
