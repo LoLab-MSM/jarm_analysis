@@ -14,23 +14,29 @@ chain4 = np.load('calibration_normalization_preequilibration/jnk3_dreamzs_5chain
 
 total_iterations = chain0.shape[0]
 burnin = int(total_iterations / 2)
-print (burnin)
-samples = np.concatenate((chain0[burnin:, :], chain1[burnin:, :], chain2[burnin:, :],
-                          chain3[burnin:, :], chain4[burnin:, :]))
+print(burnin)
+samples = np.concatenate((chain0[burnin:, :], chain1[burnin:, :],
+                          chain2[burnin:, :],
+                          chain3[burnin:, :],
+                          chain4[burnin:, :]))
 
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 29, 33, 37, 38, 39, 40, 41, 43, 45]
-rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27,
+                      29, 33, 37, 38, 39, 40, 41, 43, 45]
+rates_of_interest_mask = [i in idx_pars_calibrate
+                          for i, par in enumerate(model.parameters)]
 param_values = np.array([p.value for p in model.parameters])
 
 all_parameters = np.tile(param_values, (burnin * 5, 1))
-print (all_parameters[:, idx_pars_calibrate].shape)
-print (samples.shape)
+print(all_parameters[:, idx_pars_calibrate].shape)
+print(samples.shape)
 all_parameters[:, idx_pars_calibrate] = 10 ** samples
 
 integrator_opt = {'rtol': 1e-6, 'atol': 1e-6, 'mxsteps': 20000}
 
-cupsoda_solver = CupSodaSimulator(model, tspan=tspan_eq, gpu=0, obs_species_only=False,
-                                  memory_usage='shared_constant', integrator_options=integrator_opt)
+cupsoda_solver = CupSodaSimulator(model, tspan=tspan_eq, gpu=0,
+                                  obs_species_only=False,
+                                  memory_usage='shared_constant',
+                                  integrator_options=integrator_opt)
 
 kcat_idx = [38, 39]
 
