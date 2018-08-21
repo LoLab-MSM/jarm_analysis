@@ -3,7 +3,8 @@ import numpy as np
 from equilibration_function import pre_equilibration
 from pysb.simulator import CupSodaSimulator
 
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25,
+                      27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 calibrated_pars = np.load('most_likely_par_100000.npy')
