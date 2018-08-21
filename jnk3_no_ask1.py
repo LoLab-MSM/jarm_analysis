@@ -53,7 +53,7 @@ Parameter('kr_puJNK3_bind_Arr_MKK7', 21)
 
 # # ppJNK3 with Arrestin-3, K_D = 220 microM, figure 1.H
 Parameter('kf_ppJNK3_Arr', 2)
-Parameter('kr_ppJNK3_Arr', 38.4)
+Parameter('kr_ppJNK3_Arr', 32)
 
 # uuJNK3 binds Arrestin, K_D = 1.4 microM, figure 1.E
 Parameter('kf_uuJNK3_Arr', 2)
@@ -111,8 +111,8 @@ Parameter('kr_pJNK3_MKK7complex', 60)
 Parameter('Arrestin_0', 5)
 Parameter('pMKK4_0', 0.05)
 Parameter('pMKK7_0', 0.05)
-Parameter('uuJNK3_0', 0.43398)
-Parameter('puJNK3_0', 0.162)
+Parameter('uuJNK3_0', 0.5959)
+Parameter('puJNK3_0', 0)
 Parameter('upJNK3_0', 0.00402)
 
 Initial(Arrestin(b1=None, b2=None, b3=None), Arrestin_0)
