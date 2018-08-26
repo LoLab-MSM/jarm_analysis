@@ -15,9 +15,10 @@ with open('dom_path_labels.pkl', 'wb') as f:
 cs = ClusterSequences(path_signatures)
 cs.diss_matrix(n_jobs=20)
 sil_df = cs.silhouette_score_agglomerative_range(cluster_range=20, n_jobs=20)
+print(sil_df)
 nclusters = sil_df.loc[sil_df['cluster_silhouette'].idxmax()].num_clusters
 nclusters = int(nclusters)
-cs.spectral_clustering(nclusters=nclusters, n_jobs=20)
+cs.spectral_clustering(n_clusters=nclusters, n_jobs=20)
 
 ps = PlotSequences(cs)
 ps.plot_sequences(type_fig='modal', title='modal_path')
