@@ -37,7 +37,7 @@ ac.plot_pattern_sps_distribution(pattern=jnk3, type_fig='entropy', fig_name='ent
 ac.plot_pattern_sps_distribution(pattern=mkk4, type_fig='bar', fig_name='mkk4_bar')
 ac.plot_pattern_sps_distribution(pattern=mkk4, type_fig='entropy', fig_name='mkk4_entropy')
 ac.plot_pattern_sps_distribution(pattern=mkk7, type_fig='bar', fig_name='mkk7_bar')
-ac.plot_pattern_sps_distribution(pattern=mkk7, type_fig='entropy', fig_name='mkk4_entropy')
+ac.plot_pattern_sps_distribution(pattern=mkk7, type_fig='entropy', fig_name='mkk7_entropy')
 
 
 
