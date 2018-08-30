@@ -6,7 +6,7 @@ from scipy.stats import norm, halfnorm, uniform
 from pydream.convergence import Gelman_Rubin
 from jnk3_no_ask1 import model
 import pandas as pd
-from equilibration_function import pre_equilibration
+from equilibration_function_model import pre_equilibration
 
 # Initialize PySB solver
 
@@ -21,7 +21,7 @@ like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values,
                                 scale=exp_data['pTyr_arrestin_std'].values)
 
 like_mkk7_arrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_arrestin_avg'].values[:4],
-                                       scale=exp_data['pTyr_arrestin_std'].values[:4])
+				scale=exp_data['pTyr_arrestin_std'].values[:4])
 
 like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values[4:],
                                 scale=exp_data['pThr_arrestin_std'].values[4:])
@@ -50,14 +50,11 @@ kcat_idx = [36, 37]
 
 param_values = np.array([p.value for p in model.parameters])
 
-# Define a uniform prior between the max and min k_off from the
-# database defined at: 'predicting kinetic constants of protein'
-# 'protein interactions based on structural properties'
-
 sampled_parameter_names = [SampledParam(uniform, loc=np.log10(5E-8), scale=np.log10(1.9E3)-np.log10(5E-8))
                            for pa in param_values[rates_of_interest_mask]]
-# We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
-# for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
+# sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
+# # We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
+# # for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
 # sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
 # sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
 
@@ -82,8 +79,7 @@ def likelihood(position):
     all_pars = np.stack((pars_eq1, pars_eq2))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
     try:
-        eq_conc = pre_equilibration(solver, time_eq, all_pars)[1]
-        print(eq_conc)
+        eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
     except:
         logp_total = -np.inf
         return logp_total
@@ -102,21 +98,28 @@ def likelihood(position):
     logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
 
     #If model simulation failed due to integrator errors, return a log probability of -inf.
-    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin + logp_mkk7_noarrestin
+    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin_total + logp_mkk4_noarrestin + logp_mkk7_noarrestin
     if np.isnan(logp_total):
         logp_total = -np.inf
 
     return logp_total
+
+par1 = np.load('pso_pars/calibrated_pars_pso.npy')
+par2 = np.load('pso_pars/calibrated_pars_pso2.npy')
+par3 = np.load('pso_pars/calibrated_pars_pso3.npy')
+par4 = np.load('pso_pars/calibrated_pars_pso4.npy')
+par5 = np.load('pso_pars/calibrated_pars_pso5.npy')
+pso_pars = [par1, par2, par3, par4, par5]
 
 if __name__ == '__main__':
 
     # Run DREAM sampling.  Documentation of DREAM options is in Dream.py.
     converged = False
     total_iterations = niterations
-    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
+    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood, start=pso_pars,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
-                                       model_name='jnk3_dreamzs_5chain2', verbose=False)
+                                       model_name='jnk3_dreamzs_5chain2', verbose=True)
 
     # Save sampling output (sampled parameter values and their corresponding logps).
     for chain in range(len(sampled_params)):
