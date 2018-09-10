@@ -26,7 +26,7 @@ repeated_parameter_values = np.tile(par_clus1, (n_conditions, 1))
 repeated_parameter_values[:, arrestin_idx] = arrestin_initials
 np.save('arrestin_diff_IC_par0.npy', repeated_parameter_values)
 
-tspan_eq = np.linspace(0, 1000, 100)
+tspan_eq = np.linspace(0, 100, 100)
 integrator_opt = {'rtol': 1e-6, 'atol': 1e-6, 'mxsteps': 20000}
 
 cupsoda_solver = CupSodaSimulator(model, tspan=tspan_eq, gpu=0, obs_species_only=False,
