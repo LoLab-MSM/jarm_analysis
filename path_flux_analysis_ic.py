@@ -6,7 +6,8 @@ from jnk3_no_ask1 import model
 import numpy as np
 import pickle
 
-path_signatures, path_labels = DomPath(model, 'simulations_iz_jnk3.h5', target='s27', depth=5, dom_om=0.5)
+disc = DomPath(model, 'simulations_ic_jnk3.h5', target='s27', depth=5, dom_om=0.5)
+path_signatures, path_labels = disc.get_path_signatures(cpu_cores=4, verbose=True)
 np.save('dom_path_signatures.npy', path_signatures)
 
 with open('dom_path_labels.pkl', 'wb') as f:
