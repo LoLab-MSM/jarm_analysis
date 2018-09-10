@@ -1,4 +1,4 @@
-from tropical.dominant_path_analysis import run_dompath_multi, run_dompath_single
+from tropical.discretize_path import DomPath
 from tropical.examples.jnk3.jnk3_no_ask1 import model
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
@@ -16,4 +16,5 @@ tspan = np.linspace(0, 60, 100)
 # data = viz.static_view(get_passengers=False)
 sim = ScipyOdeSimulator(model, tspan, param_values=[param_values]).run()
 # d = run_dompath_multi(model, sim, target='s27', depth=4, cpu_cores=2)
-d = run_dompath_single(model, sim, dom_om=0.5, target='s27', depth=5)
+d = DomPath(model, sim, dom_om=0.5, target='s27', depth=5)
+q, paths = d.get_path_signatures(cpu_cores=2)

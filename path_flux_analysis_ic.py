@@ -1,4 +1,4 @@
-from tropical.dominant_path_analysis import run_dompath_multi
+from tropical.discretize_path import DomPath
 from tropical.clustering import ClusterSequences
 from tropical.plot_signatures import PlotSequences
 from tropical.cluster_analysis import AnalysisCluster
@@ -6,12 +6,11 @@ from jnk3_no_ask1 import model
 import numpy as np
 import pickle
 
-d = run_dompath_multi(model, 'simulations_ic_jnk3.h5', target='s27', depth=5, cpu_cores=20)
-path_signatures = d['signatures']
+path_signatures, path_labels = DomPath(model, 'simulations_iz_jnk3.h5', target='s27', depth=5, dom_om=0.5)
 np.save('dom_path_signatures.npy', path_signatures)
 
 with open('dom_path_labels.pkl', 'wb') as f:
-    pickle.dump(d['labels'], f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(path_labels, f, pickle.HIGHEST_PROTOCOL)
 
 cs = ClusterSequences(path_signatures)
 cs.diss_matrix(n_jobs=20)
@@ -38,7 +37,3 @@ ac.plot_pattern_sps_distribution(pattern=mkk4, type_fig='bar', fig_name='mkk4_ba
 ac.plot_pattern_sps_distribution(pattern=mkk4, type_fig='entropy', fig_name='mkk4_entropy')
 ac.plot_pattern_sps_distribution(pattern=mkk7, type_fig='bar', fig_name='mkk7_bar')
 ac.plot_pattern_sps_distribution(pattern=mkk7, type_fig='entropy', fig_name='mkk7_entropy')
-
-
-
-
