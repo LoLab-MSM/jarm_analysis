@@ -3,11 +3,11 @@ import numpy as np
 from equilibration_function import pre_equilibration
 from pysb.simulator import CupSodaSimulator
 
-chain0 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_0_100000.npy')
-chain1 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_1_100000.npy')
-chain2 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_2_100000.npy')
-chain3 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_3_100000.npy')
-chain4 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_4_100000.npy')
+chain0 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_0_500000.npy')
+chain1 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_1_500000.npy')
+chain2 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_2_500000.npy')
+chain3 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_3_500000.npy')
+chain4 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_4_500000.npy')
 
 total_iterations = chain0.shape[0]
 burnin = int(total_iterations / 2)
@@ -57,7 +57,7 @@ pars_eq_noarrestin = np.copy(all_par_set_calibrated)
 all_pars_noarrestin = np.copy(all_par_set_calibrated)
 pars_eq_noarrestin[:, arrestin_idx] = 0
 all_pars_noarrestin[:, arrestin_idx] = 0
-pars_eq_noarrestin[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
+pars_eq_noarrestin[:, jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
 
 pars_eq_noarrestin[:, kcat_idx] = 0
 conc_eq_noarrestin = pre_equilibration(cupsoda_solver, param_values=pars_eq_noarrestin)[1]
