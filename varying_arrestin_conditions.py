@@ -51,11 +51,11 @@ ppjnk3_max_idx = np.argmax(ppjnk3)
 plt.plot(arrestin_initials, ppjnk3)
 
 # Fill areas under the curve given by the clusters
-labels = np.load('path_labels.npy')
-clus0_idxs = np.where(labels == 0)
-clus1_idxs = np.where(labels == 1)
-clus2_idxs = np.where(labels == 2)
-clus3_idxs = np.where(labels == 3)
+clus_labels = np.load('path_labels_depth7.npy')
+clus0_idxs = np.where(clus_labels == 0)
+clus1_idxs = np.where(clus_labels == 1)
+clus2_idxs = np.where(clus_labels == 2)
+clus3_idxs = np.where(clus_labels == 3)
 
 plt.fill_between(arrestin_initials[clus0_idxs], ppjnk3[clus0_idxs], color='#E69F00')
 plt.fill_between(arrestin_initials[clus1_idxs], ppjnk3[clus1_idxs], color='#0072B2')
@@ -68,13 +68,13 @@ plt.annotate('Cluster 2',
             arrowprops=dict(facecolor='black', shrink=0.05),
             horizontalalignment='right', verticalalignment='top')
 
-plt.annotate('Cluster 0',
+plt.annotate('Cluster 1',
             xy=(40, 0.03), xycoords='data',
             xytext=(0.8, 0.85), textcoords='axes fraction',
             arrowprops=dict(facecolor='black', shrink=0.05),
             horizontalalignment='right', verticalalignment='top')
 
-plt.annotate('Cluster 1',
+plt.annotate('Cluster 0',
             xy=(80, 0.02), xycoords='data',
             xytext=(1, 0.85), textcoords='axes fraction',
             arrowprops=dict(facecolor='black', shrink=0.05),
@@ -95,5 +95,5 @@ plt.xlim(0, max_arrestin)
 plt.xlabel(r'Arrestin [$\mu$M]')
 plt.ylabel(r'Activated JNK3 [$\mu$M]')
 
-plt.savefig('varying_arrestin_27.pdf', format='pdf', bbox_inches='tight')
+plt.savefig('varying_arrestin_27_depth7.pdf', format='pdf', bbox_inches='tight')
 # plt.show()
