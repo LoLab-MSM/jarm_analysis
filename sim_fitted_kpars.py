@@ -3,11 +3,11 @@ import numpy as np
 from equilibration_function import pre_equilibration
 from pysb.simulator import CupSodaSimulator
 
-chain0 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_0_500000.npy')
-chain1 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_1_500000.npy')
-chain2 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_2_500000.npy')
-chain3 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_3_500000.npy')
-chain4 = np.load('pydream_results1/jnk3_dreamzs_5chain_sampled_params_chain_4_500000.npy')
+chain0 = np.load('pydream_results2/jnk3_dreamzs_5chain_sampled_params_chain_0_500000.npy')
+chain1 = np.load('pydream_results2/jnk3_dreamzs_5chain_sampled_params_chain_1_500000.npy')
+chain2 = np.load('pydream_results2/jnk3_dreamzs_5chain_sampled_params_chain_2_500000.npy')
+chain3 = np.load('pydream_results2/jnk3_dreamzs_5chain_sampled_params_chain_3_500000.npy')
+chain4 = np.load('pydream_results2/jnk3_dreamzs_5chain_sampled_params_chain_4_500000.npy')
 
 total_iterations = chain0.shape[0]
 burnin = int(total_iterations / 2)
@@ -24,6 +24,7 @@ rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.
 
 param_values = np.array([p.value for p in model.parameters])
 
+unique_pars = unique_pars[max_idx[:5000]]
 par_set_calibrated = np.copy(param_values)
 all_par_set_calibrated = np.tile(par_set_calibrated, (len(unique_pars), 1))
 all_par_set_calibrated[:, rates_of_interest_mask] = 10 ** unique_pars
@@ -47,7 +48,7 @@ sims_final = CupSodaSimulator(model, tspan=tspan, gpu=0, obs_species_only=False,
                               memory_usage='shared_constant',
                               integrator_options=integrator_opt).run(param_values=all_par_set_calibrated,
                                                                      initials=conc_eq)
-
+print(sims_final.dataframe['__s27'])
 sims_final.save('simulations_arrestin_jnk3.h5')
 
 # Simulations without arrestin
@@ -66,4 +67,5 @@ sims_final_noarrestin = CupSodaSimulator(model, tspan=tspan, gpu=0, obs_species_
                                          memory_usage='shared_constant',
                                          integrator_options=integrator_opt).run(param_values=all_pars_noarrestin,
                                                                                 initials=conc_eq_noarrestin)
+print(sims_final_noarrestin.dataframe['__s27'])
 sims_final_noarrestin.save('simulations_noarrestin_jnk3.h5')
