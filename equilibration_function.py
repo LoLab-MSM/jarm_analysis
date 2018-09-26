@@ -25,7 +25,7 @@ def pre_equilibration(solver, time_search=None, param_values=None, tolerance=1e-
     """
     # Solve system for the time span provided
     sims = solver.run(tspan=time_search, param_values=param_values)
-    if not time_search:
+    if time_search is None:
         time_search = solver.tspan
 
     if sims.nsims == 1:
