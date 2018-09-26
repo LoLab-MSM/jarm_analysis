@@ -54,11 +54,11 @@ sampled_parameter_names = [SampledParam(uniform, loc=np.log10(5E-8), scale=np.lo
 # sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
 # # We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
 # # for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
-# sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
-# sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
+sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
+sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
 
 nchains = 5
-niterations = 100000
+niterations = 500000
 
 
 def likelihood(position):
@@ -85,7 +85,7 @@ def likelihood(position):
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    pars2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
     logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
     logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood, start=pso_pars,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
-                                       model_name='jnk3_dreamzs_5chain2', verbose=True)
+                                       model_name='jnk3_dreamzs_5chain2', verbose=False)
 
     # Save sampling output (sampled parameter values and their corresponding logps).
     for chain in range(len(sampled_params)):
