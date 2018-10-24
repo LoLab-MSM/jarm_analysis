@@ -10,38 +10,45 @@ from equilibration_function_model import pre_equilibration
 
 # Initialize PySB solver
 
-exp_data = pd.read_csv('data/exp_data_3min.csv')
+exp_data = pd.read_csv('data/exp_data_3min_minmax.csv')
 
 tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)
 t_exp_mask = [idx in exp_data['Time (secs)'].values[:] for idx in tspan]
 
 solver = ScipyOdeSimulator(model, tspan=tspan)
 
-oolr_arrestin = 1
-like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values[oolr_arrestin:],
-                                scale=exp_data['pTyr_arrestin_std'].values[oolr_arrestin:])
+like_mkk4_arrestin_pjnk3_01 = halfnorm(loc=exp_data['pTyr_arrestin_avg'].values[:1],
+                                       scale=exp_data['pTyr_arrestin_std'].values[:1])
 
-like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values[oolr_arrestin:],
-                                scale=exp_data['pThr_arrestin_std'].values[oolr_arrestin:])
+like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values[1:],
+                                scale=exp_data['pTyr_arrestin_std'].values[1:])
 
-# like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values[4:],
-#                                 scale=exp_data['pTyr_noarrestin_std'].values[4:])
-oolr_mkk4_noarrestin = 4
-oolr_mkk7_noarrestin = 2
-like_mkk4_noarrestin_pjnk3_04 = norm(loc=exp_data['pTyr_noarrestin_avg'].values[oolr_mkk4_noarrestin:],
-                                         scale=exp_data['pTyr_noarrestin_std'].values[oolr_mkk4_noarrestin:])
-like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[oolr_mkk7_noarrestin:],
-                                  scale=exp_data['pThr_noarrestin_std'].values[oolr_mkk7_noarrestin:])
+like_mkk7_arrestin_pjnk3_01 = halfnorm(loc=exp_data['pThr_arrestin_avg'].values[:1],
+                                       scale=exp_data['pThr_arrestin_std'].values[:1])
+
+like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values[1:],
+                                scale=exp_data['pThr_arrestin_std'].values[1:])
+
+like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values[4:],
+                                scale=exp_data['pTyr_noarrestin_std'].values[4:])
+
+like_mkk4_noarrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_noarrestin_avg'].values[:4],
+                                       scale=exp_data['pTyr_noarrestin_std'].values[:4])
+
+like_mkk7_noarrestin_pjnk3_02 = halfnorm(loc=exp_data['pThr_noarrestin_avg'].values[:2],
+                                         scale=exp_data['pThr_noarrestin_std'].values[:2])
+
+like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[2:],
+                                scale=exp_data['pThr_noarrestin_std'].values[2:])
 
 like_thermobox = norm(loc=1, scale=1e-2)
-like_ic = norm(loc=0.6, scale=1e-3)
 
 # Add PySB rate parameters to be sampled as unobserved random variables to DREAM with normal priors
 
 ## New kds in jnk3 mkk4/7
 # idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
 # idx_pars_calibrate = [5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream2
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43, 47, 48, 49]  # pydream3
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
@@ -53,22 +60,16 @@ kcat_idx = [36, 37]
 
 param_values = np.array([p.value for p in model.parameters])
 
-sampled_parameter_names = [SampledParam(uniform, loc=np.log10(5E-8), scale=np.log10(1.9E3) - np.log10(5E-8))
+sampled_parameter_names = [SampledParam(uniform, loc=np.log10(5E-8), scale=np.log10(1.9E3)-np.log10(5E-8))
                            for pa in param_values[rates_of_interest_mask]]
-
 # sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
 # # We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
 # # for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
-sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200) - np.log10(120))
-sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280) - np.log10(28))
-
-# Initial concentration parameters
-sampled_parameter_names[18] = SampledParam(norm, loc=np.log10(0.5), scale=0.01)
-sampled_parameter_names[19] = SampledParam(norm, loc=np.log10(0.05), scale=0.01)
-sampled_parameter_names[20] = SampledParam(norm, loc=np.log10(0.05), scale=0.01)
+sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
+sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
 
 nchains = 5
-niterations = 50000
+niterations = 500000
 
 
 def likelihood(position):
@@ -83,6 +84,7 @@ def likelihood(position):
     pars_eq2 = np.copy(param_values)
 
     pars_eq2[arrestin_idx] = 0
+    # pars_eq2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
 
     all_pars = np.stack((pars_eq1, pars_eq2))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
@@ -94,20 +96,23 @@ def likelihood(position):
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
+    # pars2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
-    logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask][oolr_arrestin:] / jnk3_initial_value))
-    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask][oolr_arrestin:] / jnk3_initial_value))
+
+    logp_mkk4_arrestin_01 = np.sum(like_mkk4_arrestin_pjnk3_01.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask][:1] / jnk3_initial_value))
+    logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask][1:] / jnk3_initial_value))
+    logp_mkk7_arrestin_01 = np.sum(like_mkk7_arrestin_pjnk3_01.logpdf(sim[0]['pThr_jnk3'][t_exp_mask][:1] / jnk3_initial_value))
+    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask][1:] / jnk3_initial_value))
 
     # No arrestin simulations/experiments
 
-    logp_mkk4_noarrestin_04 = np.sum(
-        like_mkk4_noarrestin_pjnk3_04.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask][oolr_mkk4_noarrestin:] / jnk3_initial_value))
-    logp_mkk7_noarrestin = np.sum(
-        like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask][oolr_mkk7_noarrestin:] / jnk3_initial_value))
-    logp_mkk4_noarrestin_total = logp_mkk4_noarrestin_04
+    logp_mkk4_noarrestin = np.sum(like_mkk4_noarrestin_pjnk3.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask][4:] / jnk3_initial_value))
+    logp_mkk4_noarrestin_04 = np.sum(like_mkk4_noarrestin_pjnk3_04.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask][:4] / jnk3_initial_value))
+    logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask][2:] / jnk3_initial_value))
+    logp_mkk7_noarrestin_02 = np.sum(like_mkk7_noarrestin_pjnk3_02.logpdf(sim[1]['pThr_jnk3'][t_exp_mask][:2] / jnk3_initial_value))
 
-    box1 = (pars1[21] / pars1[20]) * (pars1[23] / pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
-           (1 / (pars1[5] / pars1[4]))
+    box1 = (pars1[21]/pars1[20]) * (pars1[23]/pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
+           (1 / (pars1[5]/pars1[4]))
 
     box2 = (pars1[21] / pars1[20]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
            (1 / (pars1[27] / pars1[26]))
@@ -123,18 +128,14 @@ def likelihood(position):
     logp_box3 = like_thermobox.logpdf(box3)
     logp_box4 = like_thermobox.logpdf(box4)
 
-    total_initial_jnk3 = param_values[47] + param_values[48] + param_values[49]
-    print(param_values[47], param_values[48], param_values[49])
-    logp_ic = like_ic.logpdf(total_initial_jnk3)
-
     # If model simulation failed due to integrator errors, return a log probability of -inf.
-    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin_total + \
-                 logp_mkk7_noarrestin + logp_box1 + logp_box2 + logp_box3 + logp_box4 + logp_ic
+    logp_total = logp_mkk4_arrestin_01 + logp_mkk4_arrestin + logp_mkk7_arrestin_01 + logp_mkk7_arrestin + \
+                 logp_mkk4_noarrestin + logp_mkk4_noarrestin_04 + logp_mkk7_noarrestin + logp_mkk7_noarrestin_02 + \
+                 logp_box1 + logp_box2 + logp_box3 + logp_box4
     if np.isnan(logp_total):
         logp_total = -np.inf
 
     return logp_total
-
 
 # par1 = np.load('pso_pars/calibrated_pars_pso.npy')
 # par2 = np.load('pso_pars/calibrated_pars_pso2.npy')
@@ -151,56 +152,49 @@ if __name__ == '__main__':
     sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
-                                       model_name='jnk3_dreamzs_5chain2', verbose=True)
+                                       model_name='jnk3_dreamzs_5chain2', verbose=False)
 
     # Save sampling output (sampled parameter values and their corresponding logps).
     for chain in range(len(sampled_params)):
-        np.save('pydream_results_oolr/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain) + '_' + str(
-            total_iterations), sampled_params[chain])
-        np.save('pydream_results_oolr/jnk3_dreamzs_5chain_logps_chain_' + str(chain) + '_' + str(total_iterations),
-                log_ps[chain])
+        np.save('pydream_results_minmax/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
+        np.save('pydream_results_minmax/jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
 
-    # Check convergence and continue sampling if not converged
+    #Check convergence and continue sampling if not converged
 
     GR = Gelman_Rubin(sampled_params)
-    print('At iteration: ', total_iterations, ' GR = ', GR)
-    np.savetxt('pydream_results_oolr/jnk3_dreamzs_5chain_GelmanRubin_iteration_' + str(total_iterations) + '.txt', GR)
+    print('At iteration: ',total_iterations,' GR = ',GR)
+    np.savetxt('pydream_results_minmax/jnk3_dreamzs_5chain_GelmanRubin_iteration_'+str(total_iterations)+'.txt', GR)
 
     old_samples = sampled_params
-    if np.any(GR > 1.2):
+    if np.any(GR>1.2):
         starts = [sampled_params[chain][-1, :] for chain in range(nchains)]
         while not converged:
             total_iterations += niterations
             sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
-                                               niterations=niterations, nchains=nchains, start=starts, multitry=False,
-                                               gamma_levels=4,
+                                               niterations=niterations, nchains=nchains, start=starts, multitry=False, gamma_levels=4,
                                                adapt_gamma=True, history_thin=1, model_name='jnk3_dreamzs_5chain2',
                                                verbose=True, restart=True)
 
+
             # Save sampling output (sampled parameter values and their corresponding logps).
             for chain in range(len(sampled_params)):
-                np.save('pydream_results_oolr/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain) + '_' + str(
-                    total_iterations), sampled_params[chain])
-                np.save(
-                    'pydream_results_oolr/jnk3_dreamzs_5chain_logps_chain_' + str(chain) + '_' + str(total_iterations),
-                    log_ps[chain])
+                np.save('pydream_results_minmax/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
+                np.save('pydream_results_minmax/jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
 
             old_samples = [np.concatenate((old_samples[chain], sampled_params[chain])) for chain in range(nchains)]
             GR = Gelman_Rubin(old_samples)
-            print('At iteration: ', total_iterations, ' GR = ', GR)
-            np.savetxt(
-                'pydream_results_oolr/jnk3_dreamzs_5chain_GelmanRubin_iteration_' + str(total_iterations) + '.txt', GR)
+            print('At iteration: ',total_iterations,' GR = ',GR)
+            np.savetxt('pydream_results_minmax/jnk3_dreamzs_5chain_GelmanRubin_iteration_' + str(total_iterations)+'.txt', GR)
 
-            if np.all(GR < 1.2):
+            if np.all(GR<1.2):
                 converged = True
 
     try:
-        # Plot output
+        #Plot output
         import seaborn as sns
         from matplotlib import pyplot as plt
-
         total_iterations = len(old_samples[0])
-        burnin = total_iterations / 2
+        burnin = total_iterations/2
         samples = np.concatenate((old_samples[0][burnin:, :], old_samples[1][burnin:, :], old_samples[2][burnin:, :],
                                   old_samples[3][burnin:, :], old_samples[4][burnin:, :]))
 
@@ -209,14 +203,12 @@ if __name__ == '__main__':
         for dim in range(ndims):
             fig = plt.figure()
             sns.distplot(samples[:, dim], color=colors[dim], norm_hist=True)
-            fig.savefig('pydream_results_oolr/PyDREAM_jnk3_dimension_' + str(dim))
+            fig.savefig('pydream_results_minmax/PyDREAM_jnk3_dimension_'+str(dim))
 
     except ImportError:
         pass
 
 else:
 
-    run_kwargs = {'parameters': sampled_parameter_names, 'likelihood': likelihood, 'niterations': niterations,
-                  'nchains': nchains, \
-                  'multitry': False, 'gamma_levels': 4, 'adapt_gamma': True, 'history_thin': 1,
-                  'model_name': 'jnk3_dreamzs_5chain2', 'verbose': False}
+    run_kwargs = {'parameters':sampled_parameter_names, 'likelihood':likelihood, 'niterations':niterations, 'nchains':nchains, \
+                  'multitry':False, 'gamma_levels':4, 'adapt_gamma':True, 'history_thin':1, 'model_name':'jnk3_dreamzs_5chain2', 'verbose':False}
