@@ -69,24 +69,25 @@ sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.l
 sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
 
 nchains = 5
-niterations = 500000
+niterations = 100000
 
 
 def likelihood(position):
     Y = np.copy(position)
     param_values[rates_of_interest_mask] = 10 ** Y
 
-    pars1 = np.copy(param_values)
-    pars2 = np.copy(param_values)
+    pars_arr = np.copy(param_values)
+    pars_noarr = np.copy(param_values)
     # Pre-equilibration
     time_eq = np.linspace(0, 100, 100)
-    pars_eq1 = np.copy(param_values)
-    pars_eq2 = np.copy(param_values)
+    pars_eq_arr = np.copy(param_values)
+    pars_eq_noarr = np.copy(param_values)
 
-    pars_eq2[arrestin_idx] = 0
-    # pars_eq2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
+    # Setting initial condition of arrestin to 0
+    pars_eq_noarr[arrestin_idx] = 0
+    # pars_eq_noarr[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
 
-    all_pars = np.stack((pars_eq1, pars_eq2))
+    all_pars = np.stack((pars_eq_arr, pars_eq_noarr))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
     try:
         eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
@@ -95,9 +96,8 @@ def likelihood(position):
         return logp_total
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
-    pars2[arrestin_idx] = 0
-    # pars2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
-    sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
+    # pars_noarr[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
+    sim = solver.run(param_values=[pars_arr, pars_noarr], initials=eq_conc).all
 
     logp_mkk4_arrestin_01 = np.sum(like_mkk4_arrestin_pjnk3_01.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask][:1] / jnk3_initial_value))
     logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask][1:] / jnk3_initial_value))
@@ -111,17 +111,17 @@ def likelihood(position):
     logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask][2:] / jnk3_initial_value))
     logp_mkk7_noarrestin_02 = np.sum(like_mkk7_noarrestin_pjnk3_02.logpdf(sim[1]['pThr_jnk3'][t_exp_mask][:2] / jnk3_initial_value))
 
-    box1 = (pars1[21]/pars1[20]) * (pars1[23]/pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
-           (1 / (pars1[5]/pars1[4]))
+    box1 = (pars_arr[21]/pars_arr[20]) * (pars_arr[23]/pars_arr[22]) * (1 / (pars_arr[1] / pars_arr[0])) * \
+           (1 / (pars_arr[5]/pars_arr[4]))
 
-    box2 = (pars1[21] / pars1[20]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
-           (1 / (pars1[27] / pars1[26]))
+    box2 = (pars_arr[21] / pars_arr[20]) * (pars_arr[25] / pars_arr[24]) * (1 / (pars_arr[3] / pars_arr[2])) * \
+           (1 / (pars_arr[27] / pars_arr[26]))
 
-    box3 = (pars1[13] / pars1[12]) * (pars1[23] / pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
-           (1 / (pars1[15] / pars1[14]))
+    box3 = (pars_arr[13] / pars_arr[12]) * (pars_arr[23] / pars_arr[22]) * (1 / (pars_arr[1] / pars_arr[0])) * \
+           (1 / (pars_arr[15] / pars_arr[14]))
 
-    box4 = (pars1[7] / pars1[6]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
-           (1 / (pars1[11] / pars1[10]))
+    box4 = (pars_arr[7] / pars_arr[6]) * (pars_arr[25] / pars_arr[24]) * (1 / (pars_arr[3] / pars_arr[2])) * \
+           (1 / (pars_arr[11] / pars_arr[10]))
 
     logp_box1 = like_thermobox.logpdf(box1)
     logp_box2 = like_thermobox.logpdf(box2)
@@ -137,19 +137,19 @@ def likelihood(position):
 
     return logp_total
 
-# par1 = np.load('pso_pars/calibrated_pars_pso.npy')
-# par2 = np.load('pso_pars/calibrated_pars_pso2.npy')
-# par3 = np.load('pso_pars/calibrated_pars_pso3.npy')
-# par4 = np.load('pso_pars/calibrated_pars_pso4.npy')
-# par5 = np.load('pso_pars/calibrated_pars_pso5.npy')
-# pso_pars = [par1, par2, par3, par4, par5]
+par1 = np.load('pso_pars/calibrated_pars_pso1.npy')
+par2 = np.load('pso_pars/calibrated_pars_pso2.npy')
+par3 = np.load('pso_pars/calibrated_pars_pso3.npy')
+par4 = np.load('pso_pars/calibrated_pars_pso4.npy')
+par5 = np.load('pso_pars/calibrated_pars_pso5.npy')
+pso_pars = [par1, par2, par3, par4, par5]
 
 if __name__ == '__main__':
 
     # Run DREAM sampling.  Documentation of DREAM options is in Dream.py.
     converged = False
     total_iterations = niterations
-    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
+    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood, start=pso_pars,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
                                        model_name='jnk3_dreamzs_5chain2', verbose=False)
